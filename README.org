@@ -1,5 +1,12 @@
-* Note: still a WIP
+* Tree-sitter driven indentation, syntax highlighting, and navigation
+#+ATTR_HTML: :clear right
+[[images/example-highlighting.png]]
+
+
+
 Please let me know if you see anything wrong (with a bit of a repro code) and I'll do my best to fix it.
+
+
 
 * jai-ts-mode
 A Major mode for Emacs >= 29.1 powered by tree-sitter for editing jai files.
@@ -42,6 +49,41 @@ Add this to your configuration:
 #+begin_src elisp
   (add-to-list 'auto-mode-alist '("\\.jai\\'" . jai-ts-mode))
 #+end_src
+
+** Tips and tricks
+
+Here are some conveniences that you might find useful.
+
+
+*** Dumb-jump for Go to definition/reference
+Dumb-jump seems to do almost everything I need an LSP for, with less complication and UI hiccups.
+
+Setup steps:
+1. put a `.dumb-jump` file in your project root
+
+*** Topsy for sticky function headers
+https://github.com/alphapapa/topsy.el
+
+#+ATTR_HTML: :clear right
+[[images/topsy-ex.png]]
+
+#+begin_src elisp
+(use-package! topsy)
+(add-hook 'prog-mode-hook #'topsy-mode)
+
+(defun topsy--jai-beginning-of-defun ()
+  "Return the line moved to by `jai-previous-defun-or-struct'."
+  (when (> (window-start) 1)
+    (save-excursion
+      (goto-char (window-start))
+      (re-search-backward jai-ts-mode--proc-rx nil t)
+      (font-lock-ensure (point) (pos-eol))
+      (buffer-substring (point) (pos-eol)))))
+
+(add-to-list 'topsy-mode-functions '(jai-ts-mode . topsy--jai-beginning-of-defun))
+#+end_src
+
+
 
 ** TODO Roadmap? [3/5]
 - [-] Syntax Highlighting [2/3]

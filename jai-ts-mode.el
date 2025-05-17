@@ -184,6 +184,8 @@
       (import (compiler_directive) @font-lock-preprocessor-face)
       (run_statement (compiler_directive) @font-lock-preprocessor-face)
       (compiler_directive [("#") (identifier)] @font-lock-preprocessor-face)
+      (modify_block (compiler_directive) @font-lock-preprocessor-face)
+      (run_or_insert_expression (compiler_directive) @font-lock-preprocessor-face)
       (static_if_statement (compiler_directive) @font-lock-preprocessor-face)
       (asm_statement (compiler_directive) @font-lock-preprocessor-face)
       (type_literal ("#type") @font-lock-preprocessor-face))
@@ -215,7 +217,7 @@
 
     :language 'jai
     :feature 'function
-    '((procedure_declaration name: (identifier) @font-lock-function-name-face)
+    '((procedure_declaration name: [(identifier) ("operator")] @font-lock-function-name-face)
      (call_expression function: (identifier) @font-lock-function-call-face))
 
     :language 'jai
@@ -276,7 +278,7 @@
       (narrow-to-region (treesit-node-start defun-node)
                        (treesit-node-end defun-node)))))
 
-(defun jai-ts-mode--beginning-of-defun ()
+(defun jai-ts-mode--beginning-of-defun (&optional arg)
   "Move to beginning of defun using treesit."
   (when-let* ((node (treesit-node-at (point)))
               (defun-node (treesit-parent-until
@@ -286,7 +288,7 @@
                                    jai-ts-mode--defun-function-type-list)))))
     (goto-char (treesit-node-start defun-node))))
 
-(defun jai-ts-mode--end-of-defun ()
+(defun jai-ts-mode--end-of-defun (&optional arg)
   "Move to end of defun using treesit."
   (when-let* ((node (treesit-node-at (point)))
               (defun-node (treesit-parent-until
