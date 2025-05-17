@@ -265,50 +265,8 @@
 (defconst jai-ts-mode--defun-function-type-list
   '("procedure_declaration"
     "struct_declaration"
-    "enum_declaration"))
-
-(defun jai-ts-mode--narrow-to-defun ()
-  "Narrow to the function/method definition at point using treesit."
-  (let ((node (treesit-node-at (point))))
-    (when-let ((defun-node (treesit-parent-until
-                           node
-                           (lambda (n)
-                             (member (treesit-node-type n)
-                                    jai-ts-mode--defun-function-type-list)))))
-      (narrow-to-region (treesit-node-start defun-node)
-                       (treesit-node-end defun-node)))))
-
-(defun jai-ts-mode--beginning-of-defun (&optional arg)
-  "Move to beginning of defun using treesit."
-  (when-let* ((node (treesit-node-at (point)))
-              (defun-node (treesit-parent-until
-                          node
-                          (lambda (n)
-                            (member (treesit-node-type n)
-                                   jai-ts-mode--defun-function-type-list)))))
-    (goto-char (treesit-node-start defun-node))))
-
-(defun jai-ts-mode--end-of-defun (&optional arg)
-  "Move to end of defun using treesit."
-  (when-let* ((node (treesit-node-at (point)))
-              (defun-node (treesit-parent-until
-                          node
-                          (lambda (n)
-                            (member (treesit-node-type n)
-                                   jai-ts-mode--defun-function-type-list)))))
-    (goto-char (treesit-node-end defun-node))))
-
-(defun jai-ts-mode--get-defun-bounds ()
-  "Get bounds of defun using treesit."
-  (when-let* ((node (treesit-node-at (point)))
-              (defun-node (treesit-parent-until
-                          node
-                          (lambda (n)
-                            (member (treesit-node-type n)
-                                   jai-ts-mode--defun-function-type-list)))))
-    (cons (treesit-node-start defun-node)
-          (treesit-node-end defun-node))))
-
+    "enum_declaration")
+  "List of tree-sitter node types considered as defuns in Jai mode.")
 
 (defun jai-ts-mode--defun-name (node)
   "Return the defun name of NODE.
@@ -345,12 +303,7 @@ Return nil if there is no name or if NODE is not a defun node."
     (setq-local comment-end "")
     (setq-local comment-start-skip (rx "//" (* (syntax whitespace))))
 
-    ;; Navigation.
-    (setq-local treesit-defun-type-regexp
-                (regexp-opt '("function_declaration"
-                              ;;"type_declaration"
-                              )))
-    ;; this breaks which-fun:
+    ;; FIXME: this breaks which-fun:
     ;;(setq-local treesit-defun-name-function #'jai-ts-mode--defun-name)
     (setq-local treesit-defun-name-function nil)
 
@@ -361,8 +314,6 @@ Return nil if there is no name or if NODE is not a defun node."
     ;; jai-ts-mode--narrow-to-defun instead of narrow-to-defun.
     ;;
     ;; (setq-local narrow-to-defun #'jai-ts-mode--narrow-to-defun)
-    ;; (setq-local beginning-of-defun-function #'jai-ts-mode--beginning-of-defun)
-    ;; (setq-local end-of-defun-function #'jai-ts-mode--end-of-defun)
 
 
     ;; Imenu.
@@ -387,6 +338,17 @@ Return nil if there is no name or if NODE is not a defun node."
                   (type keyword number constant pointer-operator)
                   (preprocessor function punctuation))) ;; add operator here if you want those highlighted
 
+    ;; Navigation
+    (setq-local treesit-defun-type-regexp (regexp-opt jai-ts-mode--defun-function-type-list 'string))
+    
+    ;; If you need a custom skipper function:
+    ;; (setq-local treesit-defun-skipper #'my-jai-defun-skipper)
+
+    ;; TODO: nochekin remove
+    ;; Tell Emacs to use the standard tree-sitter functions
+    ;; (setq-local beginning-of-defun-function #'treesit-beginning-of-defun)
+    ;; (setq-local end-of-defun-function #'treesit-end-of-defun)
+    
     (treesit-major-mode-setup)))
 
 ;;;###autoload
@@ -396,48 +358,23 @@ Return nil if there is no name or if NODE is not a defun node."
 ;; to reset to nothing:
 ;;(unload-feature 'jai-ts-mode t)
 
-;; NOTE: not used yet
-(defun jai-ts-mode--struct-node-p (node)
-  "Return t if NODE is a struct."
-  (and
-   (string-equal "type_declaration" (treesit-node-type node))
-   (treesit-search-subtree node "struct_type" nil nil 2)))
-
 (defconst jai-ts-mode-error-regexp
   "^\\([^ \n:]+.*\.jai\\):\\([0-9]+\\),\\([0-9]+\\):")
 (push `(jai ,jai-ts-mode-error-regexp 1 2 3 2) compilation-error-regexp-alist-alist)
 (push 'jai compilation-error-regexp-alist)
-
-(defconst jai-ts-mode--identifier-rx "[[:word:][:multibyte:]_]+")
-(defconst jai-ts-mode--defun-rx "\(.*\).*\{")  ;; original
-(defconst jai-ts-mode--proc-rx (concat "\\(\\_<" jai-ts-mode--identifier-rx "\\_>\\)\\s *::\\s *\\(?:inline\\)?\\(?:struct\\)?\\s *[({]"))
-
-(defun jai-ts-mode--previous-defun ()
-  "Go to previous proc."
-  (interactive)
-  (beginning-of-line)
-  (re-search-backward jai-ts-mode--proc-rx nil t)
-  (beginning-of-line))
-
-(defun jai-ts-mode--next-defun ()
-  "Go to next proc."
-  (interactive)
-  (end-of-line)
-  (re-search-forward jai-ts-mode--proc-rx nil t)
-  (beginning-of-line))
 
 (defun jai-ts-mode--matching-brace ()
   "Jump to matching { or (."
   (interactive)
   (push-mark)
   (if (or (= (char-before) ?\}) (= (char-before) ?\)))
-      (sp-backward-sexp)
+      (backward-sexp)
     (if (or (= (char-after) ?\{) (= (char-after) ?\())
-        (sp-forward-sexp)
+        (forward-sexp)
       (if (or (= (char-before) ?\{) (= (char-before) ?\())
           (progn (backward-char)
-                 (sp-forward-sexp))
-        (sp-backward-up-sexp)))))
+                 (forward-sexp))
+        (backward-up-list)))))
 
 (defun jai-ts-mode--align-struct ()
   "Align structs, right in the colon.
@@ -462,12 +399,24 @@ align with the := at the end, not at the beginning."
           (eval cmd)
           (deactivate-mark))))))
 
+(defun jai-ts-mode--prev-defun (&optional arg)
+  "Wrap treesit-beginning-of-defun.
+ARG will be passed through (for going forwards)."
+  (interactive "P")
+  (treesit-beginning-of-defun arg)
+  (back-to-indentation))
+
+(defun jai-ts-mode--next-defun ()
+  "Go to next proc."
+  (interactive)
+  (jai-ts-mode--prev-defun -1))
+
 ;;
 ;; Example bindings:
 ;;
 ;; (map! :map jai-ts-mode-map
+;;       "C-M-a" #'jai-ts-mode--prev-defun
 ;;       "C-M-e" #'jai-ts-mode--next-defun
-;;       "C-M-a" #'jai-ts-mode--previous-defun
 ;;       "C-M-l" #'align-regexp
 ;;       "C-M-S-l" #'jai-ts-mode--align-struct)
 
