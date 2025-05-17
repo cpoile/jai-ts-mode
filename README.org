@@ -56,6 +56,20 @@ Add this to your configuration:
 
 Here are some conveniences that you might find useful.
 
+*** Navigation using treesitter, and aligning structs
+
+#+begin_src elisp
+(map! :map jai-ts-mode-map
+      "C-M-a" #'jai-ts-mode--prev-defun
+      "C-M-e" #'jai-ts-mode--next-defun
+      "C-M-l" #'align-regexp
+      "C-M-S-l" #'jai-ts-mode--align-struct)
+
+;; or
+(define-key jai-ts-mode-map (kbd "C-M-a") 'jai-ts-mode--prev-defun)
+;; etc.
+#+end_src
+
 *** Dumb-jump for Go to definition/reference
 Dumb-jump seems to do almost everything I need an LSP for.
 
