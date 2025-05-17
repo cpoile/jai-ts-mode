@@ -1,0 +1,57 @@
+* Note: still a WIP
+Please let me know if you see anything wrong (with a bit of a repro code) and I'll do my best to fix it.
+
+* jai-ts-mode
+A Major mode for Emacs >= 29.1 powered by tree-sitter for editing jai files.
+
+** Requirements
+Emacs >= 29.1 compiled with tree-sitter.
+
+The tree-sitter grammar can be found at https://github.com/constantitus/tree-sitter-jai
+
+To install it you can add this line to your `treesit-language-source-alist`:
+#+begin_src elisp
+  (defvar treesit-language-source-alist
+    '(...
+      (jai "https://github.com/constantitus/tree-sitter-jai")
+      ...))
+#+end_src
+Afterwards run M-x treesit-install-language-grammar RET jai RET.
+
+
+** Installation
+*** Manual Installation:
+Clone this repo
+#+begin_src sh
+  git clone https://github.com/cpoile/jai-ts-mode.git
+#+end_src
+and add this to your init.el file:
+#+begin_src elisp
+  (load-file "/path/to/jai-ts-mode.el")
+#+end_src
+*** use-package
+You can also use use-package to install this package, simply add this to your init.el file (you can skip the usage step below with this):
+#+begin_src elisp
+  (use-package jai-ts-mode
+    :ensure (:host github :repo "cpoile/jai-ts-mode")
+    :mode "\\.jai\\'")
+#+end_src
+
+** Usage
+Add this to your configuration:
+#+begin_src elisp
+  (add-to-list 'auto-mode-alist '("\\.jai\\'" . jai-ts-mode))
+#+end_src
+
+** TODO Roadmap? [3/5]
+- [-] Syntax Highlighting [2/3]
+  - [X] Get something working
+  - [X] Make things good enough
+  - [ ] unknown unknowns
+- [-] Indentation [2/3]
+  - [X] Get something working
+  - [X] Make sure it's good enough
+  - [ ] unknown unknowns
+- [X] Imenu
+- [X] Forward/Backward defun
+- [X] Align struct fields with a keybinding
