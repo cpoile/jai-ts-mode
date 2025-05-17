@@ -161,11 +161,11 @@ https://github.com/alphapapa/topsy.el
 (add-hook 'prog-mode-hook #'topsy-mode)
 
 (defun topsy--jai-beginning-of-defun ()
-  "Return the line moved to by `jai-previous-defun-or-struct'."
+  "Return the line moved to by `jai-ts-mode--prev-defun'."
   (when (> (window-start) 1)
     (save-excursion
       (goto-char (window-start))
-      (re-search-backward jai-ts-mode--proc-rx nil t)
+      (jai-ts-mode--prev-defun)
       (font-lock-ensure (point) (pos-eol))
       (buffer-substring (point) (pos-eol)))))
 
