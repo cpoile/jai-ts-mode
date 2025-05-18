@@ -103,38 +103,17 @@
      ((node-is ")") parent-bol 0)
      ((node-is "]") parent-bol 0)
      ((node-is "}") parent-bol 0)
-     ;;((parent-is "raw_string_literal") no-indent 0)
      ((parent-is "block") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "struct_literal") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "if_case_statement") parent-bol 0)  ;; Jai's style is no indent on cases?
      ((parent-is "if_statement") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "argument_list") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "communication_case") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "const_declaration") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "default_case") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "expression_case") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "selector_expression") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "expression_switch_statement") parent-bol 0)
-     ;; ((parent-is "field_declaration_list") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "import_spec_list") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "interface_type") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "labeled_statement") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "literal_value") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "named_parameters") parent-bol jai-ts-mode-indent-offset)
-     ;;((parent-is "assignment_parameters") parent-bol jai-ts-mode-indent-offset)
      ((match nil "assignment_parameters" nil 1 1) standalone-parent jai-ts-mode-indent-offset)
      ((match ")" "assignment_parameters" nil nil nil) standalone-parent 0)
      ((match nil "assignment_parameters" nil 2 nil) (nth-sibling 1) 0)
-     ;; ((parent-is "select_statement") parent-bol 0)
-     ;; ((parent-is "type_case") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "type_spec") parent-bol jai-ts-mode-indent-offset)
-     ;; ((parent-is "type_switch_statement") parent-bol 0)
      ((parent-is "variable_declaration") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "struct_declaration") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "enum_declaration") parent-bol jai-ts-mode-indent-offset)
-     ;; ((match nil "variable_declaration" nil 1 4) standalone-parent jai-ts-mode-indent-offset)
-     ;; ((match ")" "variable_declaration" nil nil nil) standalone-parent 0)
-     ;; ((match nil "variable_declaration" nil 2 nil) (nth-sibling 1) 0)
      ((parent-is "const_declaration") parent-bol jai-ts-mode-indent-offset)
      (no-node parent-bol 0)))
   "Tree-sitter indent rules for `jai-ts-mode'.")
@@ -307,15 +286,6 @@ Return nil if there is no name or if NODE is not a defun node."
     ;;(setq-local treesit-defun-name-function #'jai-ts-mode--defun-name)
     (setq-local treesit-defun-name-function nil)
 
-    ;; TODO: these don't seem to do anything, fix? I don't think you can
-    ;; setq-local to redefine a function. So instead, when I need this to be
-    ;; called (e.g. within mc/mark-all-symbols-like-this-in-defun), I have my
-    ;; own version of mark-all-symbols... which calls
-    ;; jai-ts-mode--narrow-to-defun instead of narrow-to-defun.
-    ;;
-    ;; (setq-local narrow-to-defun #'jai-ts-mode--narrow-to-defun)
-
-
     ;; Imenu.
     (setq-local treesit-simple-imenu-settings
                 `(("proc" "\\`procedure_declaration\\'" nil jai-ts-mode--defun-name)
@@ -340,14 +310,6 @@ Return nil if there is no name or if NODE is not a defun node."
 
     ;; Navigation
     (setq-local treesit-defun-type-regexp (regexp-opt jai-ts-mode--defun-function-type-list 'string))
-    
-    ;; If you need a custom skipper function:
-    ;; (setq-local treesit-defun-skipper #'my-jai-defun-skipper)
-
-    ;; TODO: nochekin remove
-    ;; Tell Emacs to use the standard tree-sitter functions
-    ;; (setq-local beginning-of-defun-function #'treesit-beginning-of-defun)
-    ;; (setq-local end-of-defun-function #'treesit-end-of-defun)
     
     (treesit-major-mode-setup)))
 
