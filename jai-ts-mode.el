@@ -167,6 +167,7 @@
       (run_or_insert_expression (compiler_directive) @font-lock-preprocessor-face)
       (static_if_statement (compiler_directive) @font-lock-preprocessor-face)
       (asm_statement (compiler_directive) @font-lock-preprocessor-face)
+      (assert_statement (compiler_directive) @font-lock-preprocessor-face)
       (type_literal ("#type") @font-lock-preprocessor-face))
 
     :language 'jai
@@ -180,10 +181,9 @@
       (defer_statement ("defer") @font-lock-keyword-face)
       (switch_case ("case") @font-lock-keyword-face)
       (cast_expression ("cast") @font-lock-keyword-face)
-      (struct_declaration (identifier) @font-lock-keyword-face)
       (procedure_declaration modifier: ("inline") @font-lock-keyword-face)
       (enum_declaration [("enum_flags") ("enum")] @font-lock-keyword-face)
-      (struct_or_union ("struct") @font-lock-keyword-face)
+      (struct_or_union [("struct") ("union")] @font-lock-keyword-face)
       (if_statement [("if")] @font-lock-keyword-face)
 
       ;; NOTE: I personally like to have these highlighted specifically so they're clear in the code
