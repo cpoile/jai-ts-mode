@@ -59,15 +59,18 @@ Here are some conveniences that you might find useful.
 *** Navigation using treesitter, and aligning structs
 
 #+begin_src elisp
+;; For Doom Emacs:
 (map! :map jai-ts-mode-map
       "C-M-a" #'jai-ts-mode--prev-defun
       "C-M-e" #'jai-ts-mode--next-defun
       "C-M-l" #'align-regexp
       "C-M-S-l" #'jai-ts-mode--align-struct)
 
-;; or
+;; Or regular Emacs:
 (define-key jai-ts-mode-map (kbd "C-M-a") 'jai-ts-mode--prev-defun)
-;; etc.
+(define-key jai-ts-mode-map (kbd "C-M-e") 'jai-ts-mode--next-defun)
+(define-key jai-ts-mode-map (kbd "C-M-l") 'align-regexp)
+(define-key jai-ts-mode-map (kbd "C-M-S-l") 'jai-ts-mode--align-struct)
 #+end_src
 
 *** Dumb-jump for Go to definition/reference
@@ -79,8 +82,7 @@ Setup steps:
 
 2. Add to your init.el:
 #+begin_src elisp
-(load! "dumb-jump.el")
-(after! dumb-jump
+(with-eval-after-load dumb-jump
   (setq dumb-jump-prefer-searcher 'rg
         dumb-jump-force-searcher 'rg
         dumb-jump-rg-search-args "--pcre2 --type-add \"jai:*.jai\"")
@@ -141,10 +143,11 @@ in a predefined list."
 5. Then I add that to my prog-mode-map:
 
 #+begin_src elisp
+;; For Doom Emacs:
 (map! :map prog-mode-map
       "M-."        #'cp/go-to-def-or-ref)
 
-;; or
+;; Or regular Emacs:
 (define-key prog-mode-map (kbd "M-.") 'cp/go-to-def-or-ref)
 
 #+end_src
@@ -157,7 +160,6 @@ https://github.com/alphapapa/topsy.el
 [[images/topsy-ex.png]]
 
 #+begin_src elisp
-(use-package! topsy)
 (add-hook 'prog-mode-hook #'topsy-mode)
 
 (defun topsy--jai-beginning-of-defun ()
@@ -203,9 +205,8 @@ I often want to rename a variable, but only within the current function. This is
       (narrow-to-defun)
       (mc/mark-all-symbols-like-this))))
 
-(use-package! multiple-cursors
-  :ensure   t
-  :bind (("C-c C-." . cp/mark-all-symbols-like-this-in-defun)))
+(global-set-key (kbd "C-c C-.") 'cp/mark-all-symbols-like-this-in-defun)
+
 #+end_src
 
 
