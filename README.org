@@ -81,76 +81,76 @@ Setup steps:
 1. Install https://github.com/jacktasia/dumb-jump
 
 2. Add to your init.el:
-#+begin_src elisp
-(with-eval-after-load dumb-jump
-  (setq dumb-jump-prefer-searcher 'rg
-        dumb-jump-force-searcher 'rg
-        dumb-jump-rg-search-args "--pcre2 --type-add \"jai:*.jai\"")
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
-#+end_src
+   #+begin_src elisp
+   (with-eval-after-load dumb-jump
+     (setq dumb-jump-prefer-searcher 'rg
+           dumb-jump-force-searcher 'rg
+           dumb-jump-rg-search-args "--pcre2 --type-add \"jai:*.jai\"")
+     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+   #+end_src
 
 3. put a `.dumbjump` file in your project root containing the paths to directories you want to include, e.g.:
-#+begin_src txt
-+~/Jai/modules
-#+end_src
+   #+begin_src txt
+   +~/Jai/modules
+   #+end_src
 
 4. The following are convenience functions; use if you'd like. When I press `M-.` I want it to jump to the definition of the symbol, but if I am already at the definition I want it to only show references. You may not want this behavior of course.
 
-#+begin_src elisp
-(defun treesit-enabled-p ()
-  "Checks if the current buffer has a treesit parser."
-  (and (fboundp 'treesit-available-p)
-       (treesit-available-p)
-       (treesit-language-at (point))))
-
-;; Add language node types that are considered declarations:
-(setq declaration-node-types '("procedure_declaration" "variable_declaration" "struct_declaration" "function_declaration"))
-
-(defun string-contains-any-substring-p (haystack targets)
-  "Check if HAYSTACK string contains any string from the TARGETS list.
-
-HAYSTACK is the string to search within.
-TARGETS is a list of strings to search for.
-
-Search is case-sensitive by default (respects `case-fold-search`).
-Target strings are treated literally (regex metacharacters are quoted).
-
-Returns t if any string in TARGETS is found as a substring within HAYSTACK,
-nil otherwise."
-  (seq-some
-   (lambda (target-string) (string-match-p (regexp-quote target-string) haystack))
-   targets))
-
-(defun cp/check-inspect-name-against-declarations ()
-  "Calls treesit-inspect-node-at-point and then checks if the
-internal variable treesit--inspect-name exactly matches any type
-in a predefined list."
-  (interactive)
-  (when (treesit-enabled-p)
-    (call-interactively #'treesit-inspect-node-at-point)
-    (if (boundp 'treesit--inspect-name)
-        (string-contains-any-substring-p treesit--inspect-name declaration-node-types))))
-
-(defun cp/go-to-def-or-ref ()
-  (interactive)
-  (let ((cur (line-number-at-pos))
-        (cur-pt (point)))
-    (if (cp/check-inspect-name-against-declarations)
-        (call-interactively '+lookup/references)
-      (call-interactively '+lookup/definition))))
-#+end_src
+   #+begin_src elisp
+   (defun treesit-enabled-p ()
+     "Checks if the current buffer has a treesit parser."
+     (and (fboundp 'treesit-available-p)
+          (treesit-available-p)
+          (treesit-language-at (point))))
+   
+   ;; Add language node types that are considered declarations:
+   (setq declaration-node-types '("procedure_declaration" "variable_declaration" "struct_declaration" "function_declaration"))
+   
+   (defun string-contains-any-substring-p (haystack targets)
+     "Check if HAYSTACK string contains any string from the TARGETS list.
+   
+   HAYSTACK is the string to search within.
+   TARGETS is a list of strings to search for.
+   
+   Search is case-sensitive by default (respects `case-fold-search`).
+   Target strings are treated literally (regex metacharacters are quoted).
+   
+   Returns t if any string in TARGETS is found as a substring within HAYSTACK,
+   nil otherwise."
+     (seq-some
+      (lambda (target-string) (string-match-p (regexp-quote target-string) haystack))
+      targets))
+   
+   (defun cp/check-inspect-name-against-declarations ()
+     "Calls treesit-inspect-node-at-point and then checks if the
+   internal variable treesit--inspect-name exactly matches any type
+   in a predefined list."
+     (interactive)
+     (when (treesit-enabled-p)
+       (call-interactively #'treesit-inspect-node-at-point)
+       (if (boundp 'treesit--inspect-name)
+           (string-contains-any-substring-p treesit--inspect-name declaration-node-types))))
+   
+   (defun cp/go-to-def-or-ref ()
+     (interactive)
+     (let ((cur (line-number-at-pos))
+           (cur-pt (point)))
+       (if (cp/check-inspect-name-against-declarations)
+           (call-interactively '+lookup/references)
+         (call-interactively '+lookup/definition))))
+   #+end_src
 
 5. Then I add that to my prog-mode-map:
 
-#+begin_src elisp
-;; For Doom Emacs:
-(map! :map prog-mode-map
-      "M-."        #'cp/go-to-def-or-ref)
-
-;; Or regular Emacs:
-(define-key prog-mode-map (kbd "M-.") 'cp/go-to-def-or-ref)
-
-#+end_src
+   #+begin_src elisp
+   ;; For Doom Emacs:
+   (map! :map prog-mode-map
+         "M-."        #'cp/go-to-def-or-ref)
+   
+   ;; Or regular Emacs:
+   (define-key prog-mode-map (kbd "M-.") 'cp/go-to-def-or-ref)
+   
+   #+end_src
 
 
 *** Topsy for sticky function headers
