@@ -80,7 +80,7 @@ Setup steps:
 
 1. Install https://github.com/jacktasia/dumb-jump
 
-2. Add to your init.el:
+1. Add to your init.el:
    #+begin_src elisp
    (with-eval-after-load dumb-jump
      (setq dumb-jump-prefer-searcher 'rg
@@ -89,12 +89,12 @@ Setup steps:
      (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
    #+end_src
 
-3. put a `.dumbjump` file in your project root containing the paths to directories you want to include, e.g.:
+1. put a `.dumbjump` file in your project root containing the paths to directories you want to include, e.g.:
    #+begin_src txt
    +~/Jai/modules
    #+end_src
 
-4. The following are convenience functions; use if you'd like. When I press `M-.` I want it to jump to the definition of the symbol, but if I am already at the definition I want it to only show references. You may not want this behavior of course.
+1. The following are convenience functions; use if you'd like. When I press `M-.` I want it to jump to the definition of the symbol (not references), but if I am already at the definition I want it to show references.
 
    #+begin_src elisp
    (defun treesit-enabled-p ()
@@ -140,7 +140,7 @@ Setup steps:
          (call-interactively '+lookup/definition))))
    #+end_src
 
-5. Then I add that to my prog-mode-map:
+1. Then I add that to my prog-mode-map:
 
    #+begin_src elisp
    ;; For Doom Emacs:
@@ -178,36 +178,36 @@ I often want to rename a variable, but only within the current function. This is
 
 1. Install https://github.com/magnars/multiple-cursors.el
 
-2. Put this in your `init.el`:
+1. Put this in your `init.el`:
 
-#+begin_src elisp
-(defun jai-narrow-to-defun ()
-  "Narrow to the function/method definition at point using treesit."
-  (let ((node (treesit-node-at (point))))
-    (when-let ((defun-node (treesit-parent-until
-                           node
-                           (lambda (n)
-                             (member (treesit-node-type n)
-                                    jai-ts-mode--defun-function-type-list)))))
-      (narrow-to-region (treesit-node-start defun-node)
-                       (treesit-node-end defun-node)))))
-
-(defun cp/mark-all-symbols-like-this-in-defun ()
-  (interactive)
-  (mc--select-thing-at-point-or-bark 'symbol)
-  (if (eq major-mode 'jai-ts-mode)
-      (save-restriction
-      (widen)
-      (jai-ts-mode--narrow-to-defun)
-      (mc/mark-all-symbols-like-this))
-    (save-restriction
-      (widen)
-      (narrow-to-defun)
-      (mc/mark-all-symbols-like-this))))
-
-(global-set-key (kbd "C-c C-.") 'cp/mark-all-symbols-like-this-in-defun)
-
-#+end_src
+   #+begin_src elisp
+   (defun jai-narrow-to-defun ()
+     "Narrow to the function/method definition at point using treesit."
+     (let ((node (treesit-node-at (point))))
+       (when-let ((defun-node (treesit-parent-until
+                              node
+                              (lambda (n)
+                                (member (treesit-node-type n)
+                                       jai-ts-mode--defun-function-type-list)))))
+         (narrow-to-region (treesit-node-start defun-node)
+                          (treesit-node-end defun-node)))))
+   
+   (defun cp/mark-all-symbols-like-this-in-defun ()
+     (interactive)
+     (mc--select-thing-at-point-or-bark 'symbol)
+     (if (eq major-mode 'jai-ts-mode)
+         (save-restriction
+         (widen)
+         (jai-ts-mode--narrow-to-defun)
+         (mc/mark-all-symbols-like-this))
+       (save-restriction
+         (widen)
+         (narrow-to-defun)
+         (mc/mark-all-symbols-like-this))))
+   
+   (global-set-key (kbd "C-c C-.") 'cp/mark-all-symbols-like-this-in-defun)
+   
+   #+end_src
 
 
 ** TODO Roadmap? [3/5]
