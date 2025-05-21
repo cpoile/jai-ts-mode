@@ -358,12 +358,12 @@ Return nil if there is no name or if NODE is not a defun node."
 If there's a region active, align that. If there's a `:=' then
 align with the := at the end, not at the beginning."
   (interactive)
-  (let ((cmd (if (region-active-p)
-                 (cond ((eq t (jai-ts-mode--every-line-has-symbol (region-beginning) (region-end) "::"))
-                        '(align-regexp (region-beginning) (region-end) "\\(\\s-*\\):"))
-                       ((string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end)))
-                        '(align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1)))
-               '(align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1))))
+  (let ((cmd '(cond ((eq t (jai-ts-mode--every-line-has-symbol (region-beginning) (region-end) "::"))
+                    (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):"))
+                   ((string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end)))
+                    (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1))
+                   (t
+                    (align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1)))))
     (if (region-active-p)
         (eval cmd)
       (save-excursion

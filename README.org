@@ -96,6 +96,8 @@ Setup steps:
 
 1. The following are convenience functions; use if you'd like. When I press `M-.` I want it to jump to the definition of the symbol (not references), but if I am already at the definition I want it to show references.
 
+   Sometimes it shows references before the definition, so I'm still working on it. Maybe it's because `+lookup/references` and `+lookup/definition` sometimes don't work? /shrug
+
    #+begin_src elisp
    (defun treesit-enabled-p ()
      "Checks if the current buffer has a treesit parser."
