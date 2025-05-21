@@ -339,15 +339,31 @@ Return nil if there is no name or if NODE is not a defun node."
                  (forward-sexp))
         (backward-up-list)))))
 
+(defun jai-ts-mode--every-line-has-symbol (beg end symbol)
+  "Check if every line in the region defined by BEG and END contains symbol."
+  (interactive "r")
+  (let ((result t)
+        (current-line-has-symbol nil))
+    (save-excursion
+      (goto-char beg)
+      (while (and result (< (point) end))
+        (setq current-line-has-symbol (string-match-p symbol (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+        (unless current-line-has-symbol
+          (setq result nil))
+        (forward-line 1)))
+    result))
+
 (defun jai-ts-mode--align-struct ()
   "Align structs, right in the colon.
 If there's a region active, align that. If there's a `:=' then
 align with the := at the end, not at the beginning."
   (interactive)
-  (let ((cmd (if (and (region-active-p)
-                  (string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end))))
-                '(align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1)
-              '(align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1))))
+  (let ((cmd (if (region-active-p)
+                 (cond ((eq t (jai-ts-mode--every-line-has-symbol (region-beginning) (region-end) "::"))
+                        '(align-regexp (region-beginning) (region-end) "\\(\\s-*\\):"))
+                       ((string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end)))
+                        '(align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1)))
+               '(align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1))))
     (if (region-active-p)
         (eval cmd)
       (save-excursion
