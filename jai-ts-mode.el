@@ -169,6 +169,7 @@
       (asm_statement (compiler_directive) @font-lock-preprocessor-face)
       (assert_statement (compiler_directive) @font-lock-preprocessor-face)
       (through_statement (compiler_directive) @font-lock-preprocessor-face)
+      (placeholder_declaration (compiler_directive) @font-lock-preprocessor-face)
       (type_literal ("#type") @font-lock-preprocessor-face))
 
     :language 'jai
