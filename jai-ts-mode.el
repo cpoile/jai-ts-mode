@@ -207,7 +207,8 @@
       (address ("*") @font-lock-operator-face)
       (pointer_type ("*") @font-lock-operator-face)
       (pointer_expression operator: ("<<") @font-lock-operator-face)
-      (member_expression (postfix_dereference) @font-lock-operator-face))
+      (member_expression (postfix_dereference) @font-lock-operator-face)
+      (for_statement ("*") @font-lock-operator-face))
 
     :language 'jai
     :feature 'operator
