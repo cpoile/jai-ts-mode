@@ -158,18 +158,7 @@
 
     :language 'jai
     :feature 'preprocessor
-    '(
-      (load (compiler_directive) @font-lock-preprocessor-face)
-      (import (compiler_directive) @font-lock-preprocessor-face)
-      (run_statement (compiler_directive) @font-lock-preprocessor-face)
-      (compiler_directive [("#") (identifier)] @font-lock-preprocessor-face)
-      (modify_block (compiler_directive) @font-lock-preprocessor-face)
-      (run_or_insert_expression (compiler_directive) @font-lock-preprocessor-face)
-      (static_if_statement (compiler_directive) @font-lock-preprocessor-face)
-      (asm_statement (compiler_directive) @font-lock-preprocessor-face)
-      (assert_statement (compiler_directive) @font-lock-preprocessor-face)
-      (through_statement (compiler_directive) @font-lock-preprocessor-face)
-      (placeholder_declaration (compiler_directive) @font-lock-preprocessor-face)
+    '(((compiler_directive) @font-lock-preprocessor-face)
       (type_literal ("#type") @font-lock-preprocessor-face))
 
     :language 'jai
@@ -234,7 +223,7 @@
       (struct_or_union_block [("{") ("}")] @font-lock-punctuation-face)
       (struct_literal [("{") ("}")] @font-lock-punctuation-face)
       (assignment_parameters [(",")] @font-lock-punctuation-face))
-    
+
     :language 'jai
     :feature 'number
     '([(float)
@@ -313,7 +302,7 @@ Return nil if there is no name or if NODE is not a defun node."
 
     ;; Navigation
     (setq-local treesit-defun-type-regexp (regexp-opt jai-ts-mode--defun-function-type-list 'string))
-    
+
     (treesit-major-mode-setup)))
 
 ;;;###autoload
