@@ -305,7 +305,7 @@ Return nil if there is no name or if NODE is not a defun node."
 
     (treesit-major-mode-setup)))
 
-;;;###autoload
+
 (when (treesit-ready-p 'jai)
   (add-to-list 'auto-mode-alist '("\\.jai\\'" . jai-ts-mode)))
 
@@ -394,3 +394,4 @@ ARG will be passed through (for going forwards)."
 (provide 'jai-ts-mode)
 
 ;;; jai-ts-mode.el ends here
+
