@@ -115,6 +115,15 @@
      ((parent-is "struct_declaration") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "enum_declaration") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "const_declaration") parent-bol jai-ts-mode-indent-offset)
+     ;; We should indent the statements after the switch case, however
+     ;; the treesit writer put too many nested non-sense into a simple
+     ;; treesit node, for any normal line of code, we need to get to
+     ;; the great-grand-parent to reach the level of "switch_case"
+     ;; node type. While Emacs being Emacs, we just find the previous
+     ;; line and call it a day. This is more like a hack.
+     ((prev-line-is "switch_case") parent-bol jai-ts-mode-indent-offset)
+     ;; This indent the subsequence statement after the first line after case
+     ((prev-line-is "statement") prev-line 0)
      (no-node parent-bol 0)))
   "Tree-sitter indent rules for `jai-ts-mode'.")
 
