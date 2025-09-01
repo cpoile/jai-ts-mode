@@ -1,11 +1,12 @@
 ;;; jai-ts-mode.el --- Jai Lang Major Mode for Emacs -*- lexical-binding: t -*-
 
-;; TODO: fix all this preamble
 ;; Author: Christopher Poile
 ;; URL: https://github.com/cpoile/jai-ts-mode
 ;; Keywords: jai languages tree-sitter
 ;; Version 0.1.0
 ;; Package-Requires : ((emacs "29.1"))
+;; Modified by Jacky Li
+;; Fork URL: https://github.com/drshapeless/jai-ts-mode
 
 ;;; License:
 
@@ -43,6 +44,9 @@
 ;; And the odin-ts-mode by Sampie159 (thank you!)
 ;; https://github.com/Sampie159/odin-ts-mode
 
+;; The original repo does not accept pull request anymore. I decided
+;; to fork the repo, for some tweaks that I think is important.
+
 ;;; Code:
 
 (require 'treesit)
@@ -59,7 +63,7 @@
   :group 'jai)
 
 (defcustom jai-ts-mode-indent-offset 4
-  "Number of spaces for each indentation step in `go-ts-mode'."
+  "Number of spaces for each indentation step in `jai-ts-mode'."
   :version "29.1"
   :type 'integer
   :safe 'integerp
@@ -70,8 +74,11 @@
     (modify-syntax-entry ?\" "\"" table)
     (modify-syntax-entry ?\\ "\\" table)
 
+    ;; This is commented out because it messes up my forward-word and
+    ;; backward-word work flow. I would like to stop between underline.
+
     ;; additional symbols
-    (modify-syntax-entry ?_ "w" table)
+    ;; (modify-syntax-entry ?_ "w" table)
 
     (modify-syntax-entry ?' "." table)
     (modify-syntax-entry ?: "." table)
@@ -129,118 +136,118 @@
 
 (defvar jai-ts-mode--font-lock-rules
   (treesit-font-lock-rules
-    :language 'jai
-    :feature 'comment
-    '([(comment) (block_comment)] @font-lock-comment-face
-      (static_if_statement
-       (if_statement_condition_and_consequence
-        (if_condition (boolean "false"))
-        consequence:
+   :language 'jai
+   :feature 'comment
+   '([(comment) (block_comment)] @font-lock-comment-face
+     (static_if_statement
+      (if_statement_condition_and_consequence
+       (if_condition (boolean "false"))
+       consequence:
+       (statement
+        (block
+         ((statement) @font-lock-comment-face)))))
+     (static_if_statement
+      (if_statement_condition_and_consequence
+       (if_condition (boolean "true"))
+       consequence:
+       (_)
+       alternative:
+       (else_clause
         (statement
          (block
-          ((statement) @font-lock-comment-face)))))
-      (static_if_statement
-       (if_statement_condition_and_consequence
-        (if_condition (boolean "true"))
-        consequence:
-        (_)
-        alternative:
-        (else_clause
-         (statement
-          (block
-           ((statement) @font-lock-comment-face)))))))
+          ((statement) @font-lock-comment-face)))))))
 
-    :language 'jai
-    :feature 'string
-    '((string) @font-lock-string-face)
+   :language 'jai
+   :feature 'string
+   '((string) @font-lock-string-face)
 
-    :language 'jai
-    :feature 'type
-    `((types (identifier) @font-lock-type-face)
-      (array_type (identifier) @font-lock-type-face)
-      (identifier_type (identifier) @font-lock-type-face)
-      (struct_declaration name: (identifier) @font-lock-type-face)
-      (struct_literal type: (identifier) @font-lock-type-face)
-      (const_declaration name: (identifier) @font-lock-type-face)
-      (enum_declaration name: (identifier) @font-lock-type-face)
-      (member_type (identifier) @font-lock-type-face))
+   :language 'jai
+   :feature 'type
+   `((types (identifier) @font-lock-type-face)
+     (array_type (identifier) @font-lock-type-face)
+     (identifier_type (identifier) @font-lock-type-face)
+     (struct_declaration name: (identifier) @font-lock-type-face)
+     (struct_literal type: (identifier) @font-lock-type-face)
+     (const_declaration name: (identifier) @font-lock-type-face)
+     (enum_declaration name: (identifier) @font-lock-type-face)
+     (member_type (identifier) @font-lock-type-face))
 
-    :language 'jai
-    :feature 'preprocessor
-    '(((compiler_directive) @font-lock-preprocessor-face)
-      (type_literal ("#type") @font-lock-preprocessor-face))
+   :language 'jai
+   :feature 'preprocessor
+   '(((compiler_directive) @font-lock-preprocessor-face)
+     (type_literal ("#type") @font-lock-preprocessor-face))
 
-    :language 'jai
-    :feature 'keyword
-    '((return_statement ("return") @font-lock-keyword-face)
-      (continue_statement ("continue") @font-lock-keyword-face)
-      (for_statement ("for") @font-lock-keyword-face)
-      (while_statement ("while") @font-lock-keyword-face)
-      (using_statement ("using") @font-lock-keyword-face)
-      (break_statement ("break") @font-lock-keyword-face)
-      (defer_statement ("defer") @font-lock-keyword-face)
-      (switch_case ("case") @font-lock-keyword-face)
-      (cast_expression ("cast") @font-lock-keyword-face)
-      (procedure_declaration modifier: ("inline") @font-lock-keyword-face)
-      (enum_declaration [("enum_flags") ("enum")] @font-lock-keyword-face)
-      (struct_or_union [("struct") ("union")] @font-lock-keyword-face)
-      (if_statement [("if")] @font-lock-keyword-face)
+   :language 'jai
+   :feature 'keyword
+   '((return_statement ("return") @font-lock-keyword-face)
+     (continue_statement ("continue") @font-lock-keyword-face)
+     (for_statement ("for") @font-lock-keyword-face)
+     (while_statement ("while") @font-lock-keyword-face)
+     (using_statement ("using") @font-lock-keyword-face)
+     (break_statement ("break") @font-lock-keyword-face)
+     (defer_statement ("defer") @font-lock-keyword-face)
+     (switch_case ("case") @font-lock-keyword-face)
+     (cast_expression ("cast") @font-lock-keyword-face)
+     (procedure_declaration modifier: ("inline") @font-lock-keyword-face)
+     (enum_declaration [("enum_flags") ("enum")] @font-lock-keyword-face)
+     (struct_or_union [("struct") ("union")] @font-lock-keyword-face)
+     (if_statement [("if")] @font-lock-keyword-face)
 
-      ;; NOTE: I personally like to have these highlighted specifically so they're clear in the code
-      ;;       similar to how Jon has it in his scheme.  But you can change as you like.
-      (if_statement_condition_and_consequence [("then") ("else")] @font-lock-operator-face)
-      (else_clause ("else") @font-lock-operator-face)
-      (if_expression ("ifx") @font-lock-keyword-face)
-      (if_expression [("then") ("else")] @font-lock-operator-face)
-      (auto_cast_expression ("xx") @font-lock-operator-face))
+     ;; NOTE: I personally like to have these highlighted specifically so they're clear in the code
+     ;;       similar to how Jon has it in his scheme.  But you can change as you like.
+     (if_statement_condition_and_consequence [("then") ("else")] @font-lock-operator-face)
+     (else_clause ("else") @font-lock-operator-face)
+     (if_expression ("ifx") @font-lock-keyword-face)
+     (if_expression [("then") ("else")] @font-lock-operator-face)
+     (auto_cast_expression ("xx") @font-lock-operator-face))
 
-    :language 'jai
-    :feature 'function
-    '((procedure_declaration name: [(identifier) ("operator")] @font-lock-function-name-face)
+   :language 'jai
+   :feature 'function
+   '((procedure_declaration name: [(identifier) ("operator")] @font-lock-function-name-face)
      (call_expression function: (identifier) @font-lock-function-call-face))
 
-    :language 'jai
-    :feature 'pointer-operator
-    '((pointer_type ("*") @font-lock-operator-face)
-      (address ("*") @font-lock-operator-face)
-      (pointer_type ("*") @font-lock-operator-face)
-      (pointer_expression operator: ("<<") @font-lock-operator-face)
-      (member_expression (postfix_dereference) @font-lock-operator-face)
-      (for_statement ("*") @font-lock-operator-face))
+   :language 'jai
+   :feature 'pointer-operator
+   '((pointer_type ("*") @font-lock-operator-face)
+     (address ("*") @font-lock-operator-face)
+     (pointer_type ("*") @font-lock-operator-face)
+     (pointer_expression operator: ("<<") @font-lock-operator-face)
+     (member_expression (postfix_dereference) @font-lock-operator-face)
+     (for_statement ("*") @font-lock-operator-face))
 
-    :language 'jai
-    :feature 'operator
-    '((update_statement ("+=") @font-lock-operator-face)
-      (assignment_statement ("=") @font-lock-operator-face)
-      (binary_expression [("==") ("+") ("+=") ("-") ("-=") (">=")
-                          (">") ("<=") ("<") ("/") ("!=")] @font-lock-operator-face)
-      (variable_declaration [(":") ("=")] @font-lock-operator-face)
-      (procedure_declaration (":") @font-lock-operator-face)
-      (const_declaration (":") @font-lock-operator-face)
-      (for_statement [(",") (":")] @font-lock-operator-face))
+   :language 'jai
+   :feature 'operator
+   '((update_statement ("+=") @font-lock-operator-face)
+     (assignment_statement ("=") @font-lock-operator-face)
+     (binary_expression [("==") ("+") ("+=") ("-") ("-=") (">=")
+                         (">") ("<=") ("<") ("/") ("!=")] @font-lock-operator-face)
+     (variable_declaration [(":") ("=")] @font-lock-operator-face)
+     (procedure_declaration (":") @font-lock-operator-face)
+     (const_declaration (":") @font-lock-operator-face)
+     (for_statement [(",") (":")] @font-lock-operator-face))
 
-    :language 'jai
-    :feature 'punctuation
-    '((statement (";") @font-lock-punctuation-face)
-      (assignment_parameters [("(") (")")] @font-lock-punctuation-face)
-      (named_parameters [("(") (")")] @font-lock-punctuation-face)
-      (cast_expression [("(") (")")] @font-lock-punctuation-face)
-      (parenthesized_expression [("(") (")")] @font-lock-punctuation-face)
-      (array_type [("[") ("]") ("..")] @font-lock-punctuation-face)
-      (index_expression [("[") ("]")] @font-lock-punctuation-face)
-      (block [("{") ("}")] @font-lock-punctuation-face)
-      (struct_or_union_block [("{") ("}")] @font-lock-punctuation-face)
-      (struct_literal [("{") ("}")] @font-lock-punctuation-face)
-      (assignment_parameters [(",")] @font-lock-punctuation-face))
+   :language 'jai
+   :feature 'punctuation
+   '((statement (";") @font-lock-punctuation-face)
+     (assignment_parameters [("(") (")")] @font-lock-punctuation-face)
+     (named_parameters [("(") (")")] @font-lock-punctuation-face)
+     (cast_expression [("(") (")")] @font-lock-punctuation-face)
+     (parenthesized_expression [("(") (")")] @font-lock-punctuation-face)
+     (array_type [("[") ("]") ("..")] @font-lock-punctuation-face)
+     (index_expression [("[") ("]")] @font-lock-punctuation-face)
+     (block [("{") ("}")] @font-lock-punctuation-face)
+     (struct_or_union_block [("{") ("}")] @font-lock-punctuation-face)
+     (struct_literal [("{") ("}")] @font-lock-punctuation-face)
+     (assignment_parameters [(",")] @font-lock-punctuation-face))
 
-    :language 'jai
-    :feature 'number
-    '([(float)
-       (integer)] @font-lock-number-face)
+   :language 'jai
+   :feature 'number
+   '([(float)
+      (integer)] @font-lock-number-face)
 
-    :language 'jai
-    :feature 'constant
-    '(([(boolean) (null)] @font-lock-constant-face))))
+   :language 'jai
+   :feature 'constant
+   '(([(boolean) (null)] @font-lock-constant-face))))
 
 (defconst jai-ts-mode--defun-function-type-list
   '("procedure_declaration"
@@ -302,7 +309,7 @@ Return nil if there is no name or if NODE is not a defun node."
     (setq-local electric-indent-chars
                 (append "{}()" electric-indent-chars))
 
-      ;; Font-lock
+    ;; Font-lock
     (setq-local treesit-font-lock-settings jai-ts-mode--font-lock-rules)
     (setq-local treesit-font-lock-feature-list
                 '((comment string)
@@ -359,11 +366,11 @@ If there's a region active, align that. If there's a `:=' then
 align with the := at the end, not at the beginning."
   (interactive)
   (let ((cmd '(cond ((eq t (jai-ts-mode--every-line-has-symbol (region-beginning) (region-end) "::"))
-                    (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):"))
-                   ((string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end)))
-                    (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1))
-                   (t
-                    (align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1)))))
+                     (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):"))
+                    ((string-match-p (regexp-quote ":=") (buffer-substring (region-beginning) (region-end)))
+                     (align-regexp (region-beginning) (region-end) "\\(\\s-*\\):+=?\\(\\s-*\\)" 1 1))
+                    (t
+                     (align-regexp (region-beginning) (region-end) ":+\\(\\s-*\\)" 1 1)))))
     (if (region-active-p)
         (eval cmd)
       (save-excursion
