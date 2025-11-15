@@ -160,6 +160,7 @@
     :language 'jai
     :feature 'preprocessor
     '(((compiler_directive) @font-lock-preprocessor-face)
+      (string_directive ("#string") @font-lock-preprocessor-face)
       (type_literal ("#type") @font-lock-preprocessor-face))
 
     :language 'jai
