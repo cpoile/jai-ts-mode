@@ -238,7 +238,8 @@
 (defconst jai-ts-mode--defun-function-type-list
   '("procedure_declaration"
     "struct_declaration"
-    "enum_declaration")
+    "enum_declaration"
+    "const_declaration")
   "List of tree-sitter node types considered as defuns in Jai mode.")
 
 (defun jai-ts-mode--defun-name (node)
@@ -256,6 +257,11 @@ Return nil if there is no name or if NODE is not a defun node."
        node "name")
       t))
     ("enum_declaration"
+     (treesit-node-text
+      (treesit-node-child-by-field-name
+       node "name")
+      t))
+    ("const_declaration"
      (treesit-node-text
       (treesit-node-child-by-field-name
        node "name")
@@ -284,7 +290,8 @@ Return nil if there is no name or if NODE is not a defun node."
     (setq-local treesit-simple-imenu-settings
                 `(("proc" "\\`procedure_declaration\\'" nil jai-ts-mode--defun-name)
                   ("struct" "\\`struct_declaration\\'" nil jai-ts-mode--defun-name)
-                  ("enum" "\\`enum_declaration\\'" nil jai-ts-mode--defun-name)))
+                  ("enum" "\\`enum_declaration\\'" nil jai-ts-mode--defun-name)
+                  ("const" "\\`const_declaration\\'" nil jai-ts-mode--defun-name)))
 
     ;; Indent.
     (setq-local indent-tabs-mode nil
