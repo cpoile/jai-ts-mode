@@ -239,7 +239,11 @@
   '("procedure_declaration"
     "struct_declaration"
     "enum_declaration"
-    "const_declaration")
+    ;; NOTE: not using const_declaration so a constant doesn't become a topsy
+    ;; header and block the enclosing function's name in the topsy header.
+    ;; Uncomment if you want to have consts be a target for next/prev-defun
+    ;; "const_declaration"
+    )
   "List of tree-sitter node types considered as defuns in Jai mode.")
 
 (defun jai-ts-mode--defun-name (node)
