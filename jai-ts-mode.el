@@ -73,6 +73,9 @@
     ;; additional symbols
     (modify-syntax-entry ?_ "w" table)
 
+    ;; NOTE:  Make _ not part of word syntax (i.e., treat _ as a subword boundary) by adding this to your init.el:
+    ;;(modify-syntax-entry ?_ "_" jai-ts-mode--syntax-table)
+
     (modify-syntax-entry ?' "." table)
     (modify-syntax-entry ?: "." table)
     (modify-syntax-entry ?+  "." table)
