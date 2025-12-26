@@ -99,6 +99,42 @@
     table)
   "Syntax table for `jai-ts-mode`.")
 
+(defun jai-ts-mode--type-name (node)
+  "Return the name of NODE with type face applied."
+  (let ((name (treesit-node-text
+               (treesit-node-child-by-field-name node "name")
+               t)))
+    (propertize name 'face 'font-lock-type-face)))
+
+(defun jai-ts-mode--proc-signature (node)
+  "Return the full signature for a procedure NODE.
+Returns a string like `name :: (arg: type) -> return_type`."
+  (let* ((name (treesit-node-text
+                (treesit-node-child-by-field-name node "name")
+                t))
+         (proc (treesit-search-subtree node "procedure"))
+         (params (or (treesit-search-subtree proc "named_parameters")
+                     (treesit-search-subtree proc "assignment_parameters")))
+         (returns (treesit-search-subtree proc "procedure_returns")))
+    (concat (propertize name 'face 'font-lock-function-name-face)
+            (if params
+                (concat " :: " (treesit-node-text params t))
+              " :: ()")
+            (when returns
+              (concat " -> " (treesit-node-text returns t))))))
+
+(defcustom jai-ts-mode-imenu-settings
+  `((nil "\\`procedure_declaration\\'" nil jai-ts-mode--proc-signature)
+    (nil "\\`struct_declaration\\'" nil jai-ts-mode--type-name)
+    (nil "\\`enum_declaration\\'" nil jai-ts-mode--type-name)
+    (nil "\\`const_declaration\\'" nil jai-ts-mode--type-name))
+  "Imenu settings for `jai-ts-mode`.
+Reorder this list to change how categories appear in imenu.
+Use nil instead of a string for flat (ungrouped) display sorted by position.
+Each entry is (CATEGORY REGEXP PRED NAME-FN)."
+  :type '(repeat (list (choice (const nil) string) string (choice (const nil) function) function))
+  :group 'jai-ts)
+
 ;; NOTE: still working on these, correcting them as I encounter annoyances.
 (defvar jai-ts-mode--indent-rules
   `((jai
@@ -249,31 +285,6 @@
     )
   "List of tree-sitter node types considered as defuns in Jai mode.")
 
-(defun jai-ts-mode--defun-name (node)
-  "Return the defun name of NODE.
-Return nil if there is no name or if NODE is not a defun node."
-  (pcase (treesit-node-type node)
-    ("procedure_declaration"
-     (treesit-node-text
-      (treesit-node-child-by-field-name
-       node "name")
-      t))
-    ("struct_declaration"
-     (treesit-node-text
-      (treesit-node-child-by-field-name
-       node "name")
-      t))
-    ("enum_declaration"
-     (treesit-node-text
-      (treesit-node-child-by-field-name
-       node "name")
-      t))
-    ("const_declaration"
-     (treesit-node-text
-      (treesit-node-child-by-field-name
-       node "name")
-      t))))
-
 ;;;###autoload
 (define-derived-mode jai-ts-mode prog-mode "jai"
   "Major mode for editing jai files, powered by tree-sitter."
@@ -290,15 +301,11 @@ Return nil if there is no name or if NODE is not a defun node."
     (setq-local comment-start-skip (rx "//" (* (syntax whitespace))))
 
     ;; FIXME: this breaks which-fun:
-    ;;(setq-local treesit-defun-name-function #'jai-ts-mode--defun-name)
+    ;;(setq-local treesit-defun-name-function #'jai-ts-mode--proc-name)
     (setq-local treesit-defun-name-function nil)
 
     ;; Imenu.
-    (setq-local treesit-simple-imenu-settings
-                `(("proc" "\\`procedure_declaration\\'" nil jai-ts-mode--defun-name)
-                  ("struct" "\\`struct_declaration\\'" nil jai-ts-mode--defun-name)
-                  ("enum" "\\`enum_declaration\\'" nil jai-ts-mode--defun-name)
-                  ("const" "\\`const_declaration\\'" nil jai-ts-mode--defun-name)))
+    (setq-local treesit-simple-imenu-settings jai-ts-mode-imenu-settings)
 
     ;; Indent.
     (setq-local indent-tabs-mode nil
