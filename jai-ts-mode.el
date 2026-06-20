@@ -200,7 +200,10 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
     :feature 'preprocessor
     '(((compiler_directive) @font-lock-preprocessor-face)
       (string_directive ("#string") @font-lock-preprocessor-face)
-      (type_literal ("#type") @font-lock-preprocessor-face))
+      (type_literal ("#type") @font-lock-preprocessor-face)
+      ;; If you want to highlight #char, uncomment:
+      ;; ((char_string modifier: "#char" @font-lock-preprocessor-face))
+      )
 
     :language 'jai
     :feature 'keyword
