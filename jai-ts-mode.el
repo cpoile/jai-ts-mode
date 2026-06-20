@@ -327,7 +327,8 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
                   (preprocessor function punctuation))) ;; add operator here if you want those highlighted
 
     ;; Navigation
-    (setq-local treesit-defun-type-regexp (regexp-opt jai-ts-mode--defun-function-type-list 'string))
+    (setq-local treesit-defun-type-regexp
+                (regexp-opt jai-ts-mode--defun-function-type-list))
 
     (treesit-major-mode-setup)))
 
@@ -389,17 +390,40 @@ align with the := at the end, not at the beginning."
         (let ((begin (point)))
           (jai-ts-mode--matching-brace)
           (jai-ts-mode--matching-brace)
-          (beginning-of-line)
+          (beginning-of-line)
           (set-mark (point))
           (goto-char begin)
           (eval cmd)
           (deactivate-mark))))))
 
+(defun jai-ts-mode--find-enclosing-defun ()
+  "Find the enclosing defun node at point.
+Uses named nodes to avoid issues with anonymous punctuation nodes."
+  (let* ((root (treesit-buffer-root-node))
+         (node (treesit-node-descendant-for-range root (point) (1+ (point)))))
+    (while (and node
+                (not (string-match-p treesit-defun-type-regexp
+                                     (treesit-node-type node))))
+      (setq node (treesit-node-parent node)))
+    node))
+
 (defun jai-ts-mode--prev-defun (&optional arg)
-  "Wrap treesit-beginning-of-defun.
-ARG will be passed through (for going forwards)."
-  (interactive "P")
-  (treesit-beginning-of-defun arg)
+  "Go to the beginning of the current or previous defun.
+ARG specifies how many defuns to move (negative for forward)."
+  (interactive "p")
+  (let ((arg (or arg 1))
+        (defun-node (jai-ts-mode--find-enclosing-defun)))
+    (if (and defun-node (> arg 0) (> (point) (treesit-node-start defun-node)))
+        ;; We're inside a defun, go to its start first
+        (progn
+          (goto-char (treesit-node-start defun-node))
+          (setq arg (1- arg))))
+    ;; Now use treesit-beginning-of-defun for remaining jumps
+    (when (> arg 0)
+      (treesit-beginning-of-defun arg))
+    (when (< arg 0)
+      (treesit-end-of-defun (- arg))
+      (treesit-beginning-of-defun -1)))
   (back-to-indentation))
 
 (defun jai-ts-mode--next-defun ()
