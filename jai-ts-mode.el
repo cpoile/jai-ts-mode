@@ -332,7 +332,7 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
 
     (treesit-major-mode-setup)))
 
-;;;###autoload
+
 (when (treesit-ready-p 'jai)
   (add-to-list 'auto-mode-alist '("\\.jai\\'" . jai-ts-mode)))
 
@@ -444,3 +444,4 @@ ARG specifies how many defuns to move (negative for forward)."
 (provide 'jai-ts-mode)
 
 ;;; jai-ts-mode.el ends here
+
