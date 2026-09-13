@@ -390,7 +390,7 @@ align with the := at the end, not at the beginning."
         (let ((begin (point)))
           (jai-ts-mode--matching-brace)
           (jai-ts-mode--matching-brace)
-          (beginning-of-line)
+          (beginning-of-line)
           (set-mark (point))
           (goto-char begin)
           (eval cmd)
