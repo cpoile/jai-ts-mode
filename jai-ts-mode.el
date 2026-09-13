@@ -232,7 +232,9 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
     :language 'jai
     :feature 'function
     '((procedure_declaration name: [(identifier) ("operator")] @font-lock-function-name-face)
-     (call_expression function: (identifier) @font-lock-function-call-face))
+     (call_expression function: (identifier) @font-lock-function-call-face)
+     (call_expression
+      function: (member_expression "." (identifier) @font-lock-function-call-face)))
 
     :language 'jai
     :feature 'pointer-operator
@@ -266,6 +268,7 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
       (block [("{") ("}")] @font-lock-punctuation-face)
       (struct_or_union_block [("{") ("}")] @font-lock-punctuation-face)
       (struct_literal [("{") ("}")] @font-lock-punctuation-face)
+      (anonymous_struct_literal [("{") ("}")] @font-lock-punctuation-face)
       (assignment_parameters [(",")] @font-lock-punctuation-face))
 
     :language 'jai
