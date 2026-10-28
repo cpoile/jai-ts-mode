@@ -143,6 +143,7 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
      ((node-is "]") parent-bol 0)
      ((node-is "}") parent-bol 0)
      ((parent-is "block") parent-bol jai-ts-mode-indent-offset)
+     ((parent-is "array_literal") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "struct_literal") parent-bol jai-ts-mode-indent-offset)
      ((parent-is "if_case_statement") parent-bol 0)  ;; Jai's style is no indent on cases?
      ((parent-is "switch_case") parent-bol jai-ts-mode-indent-offset)
