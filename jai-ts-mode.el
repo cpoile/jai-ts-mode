@@ -258,18 +258,8 @@ Each entry is (CATEGORY REGEXP PRED NAME-FN)."
 
     :language 'jai
     :feature 'punctuation
-    '((statement (";") @font-lock-punctuation-face)
-      (assignment_parameters [("(") (")")] @font-lock-punctuation-face)
-      (named_parameters [("(") (")")] @font-lock-punctuation-face)
-      (cast_expression [("(") (")")] @font-lock-punctuation-face)
-      (parenthesized_expression [("(") (")")] @font-lock-punctuation-face)
-      (array_type [("[") ("]") ("..")] @font-lock-punctuation-face)
-      (index_expression [("[") ("]")] @font-lock-punctuation-face)
-      (block [("{") ("}")] @font-lock-punctuation-face)
-      (struct_or_union_block [("{") ("}")] @font-lock-punctuation-face)
-      (struct_literal [("{") ("}")] @font-lock-punctuation-face)
-      (anonymous_struct_literal [("{") ("}")] @font-lock-punctuation-face)
-      (assignment_parameters [(",")] @font-lock-punctuation-face))
+    '([";" "(" ")" "[" "]" ".." "{" "}" ","]
+      @font-lock-punctuation-face)
 
     :language 'jai
     :feature 'number
@@ -403,7 +393,8 @@ align with the := at the end, not at the beginning."
   "Find the enclosing defun node at point.
 Uses named nodes to avoid issues with anonymous punctuation nodes."
   (let* ((root (treesit-buffer-root-node))
-         (node (treesit-node-descendant-for-range root (point) (1+ (point)))))
+         (node (treesit-node-descendant-for-range
+                root (point) (min (1+ (point)) (point-max)))))
     (while (and node
                 (not (string-match-p treesit-defun-type-regexp
                                      (treesit-node-type node))))
